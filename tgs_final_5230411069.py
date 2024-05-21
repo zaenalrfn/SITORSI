@@ -105,10 +105,14 @@ def stok_barang():
                     clear()
                     put_text("Barang berhasil ditambahkan.")
                     bst.print_bst(bst.root)
+        elif sbmn_stok_barang == "3. Kembali ke menu utama":
+            main_sistem()
+            break
 
 
 # ini adalah bagian menu dari SITORASI(Sistem Informasi Stok dan Transaksi)
 def main_sistem():
+    clear()
     while True:
         # put_text("SITORASI")
         # put_text("Sistem Informasi Stok dan Transaksi")
