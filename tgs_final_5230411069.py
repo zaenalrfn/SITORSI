@@ -92,6 +92,16 @@ class BinarySearchTree:
 bst = BinarySearchTree()
 
 
+# update data tabel
+def update_data_table(data):
+    head = ["No. SKU", "Nama Barang", "Harga Satuan", "Jumlah Stok"]
+    return put_table([head] + data)
+
+
+def data_update_udt(data):
+    update_data_table(data)
+
+
 def stok_barang():
     # popup_input
     clear()
@@ -123,19 +133,22 @@ def stok_barang():
                 )
 
                 if pinput_stok_barang["sku"] < 1000 or pinput_stok_barang["sku"] > 9999:
-                    put_info("No.sku tidak valid. Harap masukkan nomor 4 digit")
+                    with use_scope("message", clear=True):
+                        put_info("No.sku tidak valid. Harap masukkan nomor 4 digit")
                 else:
-                    if bst.contains(pinput_stok_barang["sku"]):
-                        put_text("sku tersebut sudah ada")
-                    else:
-                        barang = Barang(
-                            pinput_stok_barang["sku"],
-                            pinput_stok_barang["nama_barang"],
-                            pinput_stok_barang["harga_satuan"],
-                            pinput_stok_barang["jumlah_stok"],
-                        )
-                        if bst.insert(barang):
-                            put_info("Barang berhasil ditambahkan.")
+                    with use_scope("message", clear=True):
+                        if bst.contains(pinput_stok_barang["sku"]):
+                            put_text("sku tersebut sudah ada")
+
+                        else:
+                            barang = Barang(
+                                pinput_stok_barang["sku"],
+                                pinput_stok_barang["nama_barang"],
+                                pinput_stok_barang["harga_satuan"],
+                                pinput_stok_barang["jumlah_stok"],
+                            )
+                            if bst.insert(barang):
+                                put_info("Barang berhasil ditambahkan.")
         elif sbmn_stok_barang == "2. Restok Barang":
             with use_scope("message", clear=True):
                 data = bst.print_bst()
@@ -146,21 +159,15 @@ def stok_barang():
                             label="Masukkan No.sku barang yang akan di restok : ",
                             type=NUMBER,
                         ),
-                        put_table(
-                            data,
-                            header=[
-                                "No. SKU",
-                                "Nama Barang",
-                                "Harga Satuan",
-                                "Jumlah Stok",
-                            ],
-                        ),
+                        update_data_table(data),
                     ],
                     title="Restok barang",
                 )
                 no_sku_barang = bst.find_node(pinput_restok_barang["jmh_stok_baru"])
-                if bst.contains(pinput_restok_barang["jmh_stok_baru"]) is None:
-                    put_info(f"Barang dengan No.sku {no_sku_barang} tidak ditemukan.")
+                if not bst.contains(pinput_restok_barang["jmh_stok_baru"]):
+                    put_info(
+                        f"Barang dengan No.sku {no_sku_barang} tidak ditemukan. Harap input data stok barang dulu!"
+                    )
                 else:
                     stok_baru = popup_input(
                         [
@@ -171,10 +178,16 @@ def stok_barang():
                             )
                         ]
                     )
-                    no_sku_barang.jumlah_stok += stok_baru["stok_baru"]
+                    total_stok_barang = (
+                        no_sku_barang.jumlah_stok + stok_baru["stok_baru"]
+                    )
+                    no_sku_barang.jumlah_stok = total_stok_barang
+                    # no_sku_barang.jumlah_stok += int(stok_baru["stok_baru"])
                     put_info(
                         f"Stok barang dengan No.sku {no_sku_barang}  berhasil ditambahkan\njumlah stok sekarang : {no_sku_barang.jumlah_stok}"
                     )
+                    # data = bst.print_bst()
+                    # data_update_udt(data)
         elif sbmn_stok_barang == "3. Kembali ke menu utama":
             main_sistem()
             break
