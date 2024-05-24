@@ -95,14 +95,25 @@ bst = BinarySearchTree()
 data_transaksi_baru = []
 
 
+# bagian sorted data descending
+def selection_sort(my_list):
+    for i in range(len(my_list) - 1):
+        min_index = i
+        for j in range(i + 1, len(my_list)):
+            if my_list[j] < my_list[min_index]:
+                min_index = j
+        if i != min_index:
+            temp = my_list[i]
+            my_list[i] = my_list[min_index]
+            my_list[min_index] = temp
+    return my_list
+
+
 # update data tabel
 def update_data_table(data):
-    head = ["No. SKU", "Nama Barang", "Harga Satuan", "Jumlah Stok"]
-    return put_table([head] + data)
-
-
-def data_update_udt(data):
-    update_data_table(data)
+    with use_scope("message", clear=True):
+        head = ["No. SKU", "Nama Barang", "Harga Satuan", "Jumlah Stok"]
+        return put_table([head] + data)
 
 
 def stok_barang():
@@ -190,12 +201,9 @@ def stok_barang():
                             no_sku_barang.jumlah_stok + stok_baru["stok_baru"]
                         )
                         no_sku_barang.jumlah_stok = total_stok_barang
-                        # no_sku_barang.jumlah_stok += int(stok_baru["stok_baru"])
                         put_info(
                             f"Stok barang dengan No.sku {no_sku_barang}  berhasil ditambahkan\njumlah stok sekarang : {no_sku_barang.jumlah_stok}"
                         )
-                        # data = bst.print_bst()
-                        # data_update_udt(data)
             elif sbmn_stok_barang == "3. Kembali ke menu utama":
                 main_sistem()
                 break
@@ -239,28 +247,46 @@ def transaksi_konsumen():
                         )
                         barang = bst.find_node(no_sku["no_sku"])
                         if barang.jumlah_stok >= jumlah_beli["jumlah_beli"]:
-                            barang.jumlah_stok -= jumlah_beli["jumlah_beli"]
-                            sub_total = barang.harga_satuan * jumlah_beli["jumlah_beli"]
-                            data_transaksi_baru.append(
-                                [
-                                    nama_konsumen,
-                                    no_sku,
-                                    jumlah_beli["jumlah_beli"],
-                                    sub_total,
-                                ]
-                            )
-                            put_success("Data Transaksi Konsumen Berhasil Diinputkan")
-                            lanjut_transaksi = radio(
-                                "Apakah ingin melanjutkan transaksi (Y/N)?", ["Y", "N"]
-                            )
-                            if lanjut_transaksi == "Y":
-                                continue
-                            else:
-                                break
+                            with use_scope("message", clear=True):
+                                barang.jumlah_stok -= jumlah_beli["jumlah_beli"]
+                                sub_total = (
+                                    barang.harga_satuan * jumlah_beli["jumlah_beli"]
+                                )
+                                data_transaksi_baru.append(
+                                    [
+                                        nama_konsumen,
+                                        no_sku,
+                                        jumlah_beli["jumlah_beli"],
+                                        sub_total,
+                                    ]
+                                )
+                                put_success(
+                                    "Data Transaksi Konsumen Berhasil Diinputkan"
+                                )
+                                lanjut_transaksi = radio(
+                                    "Apakah ingin melanjutkan transaksi (Y/N)?",
+                                    ["Y", "N"],
+                                )
+                                if lanjut_transaksi == "Y":
+                                    continue
+                                else:
+                                    break
                         elif barang.jumlah_stok < jumlah_beli["jumlah_beli"]:
-                            put_error(
-                                "Jumlah Stok No.SKU yang Anda beli tidak mencukupi"
-                            )
+                            with use_scope("message", clear=True):
+                                put_error(
+                                    "Jumlah Stok No.SKU yang Anda beli tidak mencukupi"
+                                )
+                                lanjut_transaksi = radio(
+                                    "Apakah ingin melanjutkan transaksi (Y/N)?",
+                                    ["Y", "N"],
+                                )
+                                if lanjut_transaksi == "Y":
+                                    continue
+                                else:
+                                    break
+                    else:
+                        with use_scope("message", clear=True):
+                            put_error("No. SKU yang diinputkan belum terdaftar")
                             lanjut_transaksi = radio(
                                 "Apakah ingin melanjutkan transaksi (Y/N)?", ["Y", "N"]
                             )
@@ -268,38 +294,42 @@ def transaksi_konsumen():
                                 continue
                             else:
                                 break
-                    else:
-                        put_error("“No. SKU yang diinputkan belum terdaftar")
-                        lanjut_transaksi = radio(
-                            "Apakah ingin melanjutkan transaksi (Y/N)?", ["Y", "N"]
-                        )
-                        if lanjut_transaksi == "Y":
-                            continue
-                        else:
-                            break
             elif sbmn_kelola_transaksi == "2. Lihat Data Seluruh Transaksi Konsumen":
-                head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
-                put_table([head] + data_transaksi_baru)
+                with use_scope("message", clear=True):
+                    head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
+                    put_table([head] + data_transaksi_baru)
+
+            elif (
+                sbmn_kelola_transaksi == "3. Lihat Data Transaksi Berdasarkan Subtotal"
+            ):
+                # INI ADALAH BAGIAN LIHAT DATA TRANSAKSI BEDASARKAN SUBTOTAL
+                with use_scope("message", clear=True):
+                    head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
+                    put_table([head] + data_transaksi_baru)
+
+            elif sbmn_kelola_transaksi == "4. Kembali ke menu utama":
+                main_sistem()
+                break
 
 
 # ini adalah bagian menu dari SITORASI(Sistem Informasi Stok dan Transaksi)
 def main_sistem():
-    clear()
-    while True:
-        put_markdown("### SITORSI")
-        put_markdown("### Sistem Informasi Stok dan Transaksi")
-        mn_stok_barang = radio(
-            "Menu yang tersedia",
-            [
-                "1. Kelola Stok Barang",
-                "2. Kelola Transaksi Konsumen",
-                "3. Keluar Program",
-            ],
-        )
-        if mn_stok_barang == "1. Kelola Stok Barang":
-            stok_barang()
-        elif mn_stok_barang == "2. Kelola Transaksi Konsumen":
-            transaksi_konsumen()
+    with use_scope("message", clear=True):
+        while True:
+            put_markdown("### SITORSI")
+            put_markdown("### Sistem Informasi Stok dan Transaksi")
+            mn_stok_barang = radio(
+                "Menu yang tersedia",
+                [
+                    "1. Kelola Stok Barang",
+                    "2. Kelola Transaksi Konsumen",
+                    "3. Keluar Program",
+                ],
+            )
+            if mn_stok_barang == "1. Kelola Stok Barang":
+                stok_barang()
+            elif mn_stok_barang == "2. Kelola Transaksi Konsumen":
+                transaksi_konsumen()
 
 
 start_server(main_sistem, port=8080)
