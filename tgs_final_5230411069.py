@@ -96,17 +96,20 @@ data_transaksi_baru = []
 
 
 # bagian sorted data descending
-def selection_sort(my_list):
-    for i in range(len(my_list) - 1):
-        min_index = i
-        for j in range(i + 1, len(my_list)):
-            if my_list[j] < my_list[min_index]:
-                min_index = j
-        if i != min_index:
-            temp = my_list[i]
-            my_list[i] = my_list[min_index]
-            my_list[min_index] = temp
-    return my_list
+def selection_sort(transaksi):
+    for i in range(len(transaksi) - 1):
+        max_index = i
+        for j in range(i + 1, len(transaksi)):
+            if (
+                transaksi[j][3] > transaksi[max_index][3]
+            ):  # Bandingkan berdasarkan subtotal
+                max_index = j
+        if i != max_index:
+            transaksi[i], transaksi[max_index] = (
+                transaksi[max_index],
+                transaksi[i],
+            )
+    return transaksi
 
 
 # update data tabel
@@ -114,6 +117,18 @@ def update_data_table(data):
     with use_scope("message", clear=True):
         head = ["No. SKU", "Nama Barang", "Harga Satuan", "Jumlah Stok"]
         return put_table([head] + data)
+
+
+# untuk menampilkan data transaksi
+def print_data_transaksi(data):
+    head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
+    put_table([head] + data)
+
+
+# untuk menampilkan data konsumen
+def print_data_bedasarkan_subtotal():
+    sorted_list = selection_sort(data_transaksi_baru)
+    print_data_transaksi(sorted_list)
 
 
 def stok_barang():
@@ -296,20 +311,19 @@ def transaksi_konsumen():
                                 break
             elif sbmn_kelola_transaksi == "2. Lihat Data Seluruh Transaksi Konsumen":
                 with use_scope("message", clear=True):
-                    head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
-                    put_table([head] + data_transaksi_baru)
+                    print_data_transaksi(data_transaksi_baru)
 
             elif (
                 sbmn_kelola_transaksi == "3. Lihat Data Transaksi Berdasarkan Subtotal"
             ):
                 # INI ADALAH BAGIAN LIHAT DATA TRANSAKSI BEDASARKAN SUBTOTAL
                 with use_scope("message", clear=True):
-                    head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
-                    put_table([head] + data_transaksi_baru)
+                    print_data_bedasarkan_subtotal()
 
             elif sbmn_kelola_transaksi == "4. Kembali ke menu utama":
-                main_sistem()
-                break
+                with use_scope("message", clear=True):
+                    main_sistem()
+                    break
 
 
 # ini adalah bagian menu dari SITORASI(Sistem Informasi Stok dan Transaksi)
