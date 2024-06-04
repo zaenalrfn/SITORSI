@@ -61,7 +61,7 @@ class BinarySearchTree:
         return data
 
     def print_bst(self):
-        data = self.collect_data(self.root)
+        data = self.collect_data(self.root, [])
         return data
 
     # untuk mengecek apakah no sku sudah ada di bst?
@@ -100,9 +100,7 @@ def selection_sort(transaksi):
     for i in range(len(transaksi) - 1):
         max_index = i
         for j in range(i + 1, len(transaksi)):
-            if (
-                transaksi[j][3] > transaksi[max_index][3]
-            ):  # Bandingkan berdasarkan subtotal
+            if transaksi[j][3] > transaksi[max_index][3]:
                 max_index = j
         if i != max_index:
             transaksi[i], transaksi[max_index] = (
@@ -112,16 +110,15 @@ def selection_sort(transaksi):
     return transaksi
 
 
-# update data tabel
-def update_data_table(data):
-    with use_scope("message", clear=True):
-        head = ["No. SKU", "Nama Barang", "Harga Satuan", "Jumlah Stok"]
-        return put_table([head] + data)
-
-
 # untuk menampilkan data transaksi
 def print_data_transaksi(data):
     head = ["Nama Konsumen", "No. SKU", "Jumlah Beli", "Subtotal"]
+    put_table([head] + data)
+
+
+# untuk menampilkan data barang
+def print_data_barang(data):
+    head = ["No. SKU", "Nama", "Harga Satuan", "Jumlah stok"]
     put_table([head] + data)
 
 
@@ -140,14 +137,17 @@ def stok_barang():
                 [
                     "1. Input Data Stok Barang",
                     "2. Restok Barang",
-                    "3. Kembali ke menu utama",
+                    "3. Lihat Data Barang",
+                    "0. Kembali ke menu utama",
                 ],
             )
             if sbmn_stok_barang == "1. Input Data Stok Barang":
                 with use_scope("message", clear=True):
                     pinput_stok_barang = popup_input(
                         [
-                            put_input("sku", label="Masukkan No.sku", type=NUMBER),
+                            put_input(
+                                "sku", label="Masukkan No.sku 4 digit", type=NUMBER
+                            ),
                             put_input(
                                 "nama_barang", label="Masukkan nama barang", type=TEXT
                             ),
@@ -172,7 +172,7 @@ def stok_barang():
                     else:
                         with use_scope("message", clear=True):
                             if bst.contains(pinput_stok_barang["sku"]):
-                                put_text("sku tersebut sudah ada")
+                                put_info("No. SKU yang diinputkan sudah terdaftar")
 
                             else:
                                 barang = Barang(
@@ -182,18 +182,17 @@ def stok_barang():
                                     pinput_stok_barang["jumlah_stok"],
                                 )
                                 if bst.insert(barang):
-                                    put_info("Barang berhasil ditambahkan.")
+                                    put_success("Barang berhasil ditambahkan.")
             elif sbmn_stok_barang == "2. Restok Barang":
                 with use_scope("message", clear=True):
-                    data = bst.print_bst()
+
                     pinput_restok_barang = popup_input(
                         [
                             put_input(
                                 "jmh_stok_baru",
-                                label="Masukkan No.sku barang yang akan di restok : ",
+                                label="Masukkan No.sku 4 digit barang yang akan di restok : ",
                                 type=NUMBER,
                             ),
-                            update_data_table(data),
                         ],
                         title="Restok barang",
                     )
@@ -210,16 +209,22 @@ def stok_barang():
                                     label="Masukkan jumlah stok tambahan",
                                     type=NUMBER,
                                 )
-                            ]
+                            ],
+                            title="Tambah Stok",
                         )
                         total_stok_barang = (
                             no_sku_barang.jumlah_stok + stok_baru["stok_baru"]
                         )
                         no_sku_barang.jumlah_stok = total_stok_barang
-                        put_info(
+                        put_success(
                             f"Stok barang dengan No.sku {no_sku_barang}  berhasil ditambahkan\njumlah stok sekarang : {no_sku_barang.jumlah_stok}"
                         )
-            elif sbmn_stok_barang == "3. Kembali ke menu utama":
+            elif sbmn_stok_barang == "3. Lihat Data Barang":
+                with use_scope("message", clear=True):
+                    data = bst.print_bst()
+                    with popup("Data barang"):
+                        print_data_barang(data)
+            elif sbmn_stok_barang == "0. Kembali ke menu utama":
                 main_sistem()
                 break
 
@@ -234,7 +239,7 @@ def transaksi_konsumen():
                     "1. Input Data Transaksi Baru",
                     "2. Lihat Data Seluruh Transaksi Konsumen",
                     "3. Lihat Data Transaksi Berdasarkan Subtotal",
-                    "4. Kembali ke menu utama",
+                    "0. Kembali ke menu utama",
                 ],
             )
             if sbmn_kelola_transaksi == "1. Input Data Transaksi Baru":
@@ -244,7 +249,7 @@ def transaksi_konsumen():
                         [
                             put_input(
                                 "no_sku",
-                                label="Masukkan No.sku barang yang dibeli",
+                                label="Masukkan No.sku 4 digit barang yang dibeli",
                                 type=NUMBER,
                             )
                         ],
@@ -258,7 +263,8 @@ def transaksi_konsumen():
                                     label="Masukkan jumlah beli",
                                     type=NUMBER,
                                 )
-                            ]
+                            ],
+                            title="Jumlah Beli",
                         )
                         barang = bst.find_node(no_sku["no_sku"])
                         if barang.jumlah_stok >= jumlah_beli["jumlah_beli"]:
@@ -279,7 +285,7 @@ def transaksi_konsumen():
                                     "Data Transaksi Konsumen Berhasil Diinputkan"
                                 )
                                 lanjut_transaksi = radio(
-                                    "Apakah ingin melanjutkan transaksi (Y/N)?",
+                                    "Apakah ingin menambahkan data pembelian untuk konsumen ini (Y/N)?",
                                     ["Y", "N"],
                                 )
                                 if lanjut_transaksi == "Y":
@@ -320,7 +326,7 @@ def transaksi_konsumen():
                 with use_scope("message", clear=True):
                     print_data_bedasarkan_subtotal()
 
-            elif sbmn_kelola_transaksi == "4. Kembali ke menu utama":
+            elif sbmn_kelola_transaksi == "0. Kembali ke menu utama":
                 with use_scope("message", clear=True):
                     main_sistem()
                     break
@@ -337,13 +343,17 @@ def main_sistem():
                 [
                     "1. Kelola Stok Barang",
                     "2. Kelola Transaksi Konsumen",
-                    "3. Keluar Program",
+                    "0. Keluar Program",
                 ],
             )
             if mn_stok_barang == "1. Kelola Stok Barang":
                 stok_barang()
             elif mn_stok_barang == "2. Kelola Transaksi Konsumen":
                 transaksi_konsumen()
+            elif mn_stok_barang == "0. Keluar Program":
+                with use_scope("message", clear=True):
+                    put_info("Terimaksih sudah menggunakan SITORSI")
+                    break
 
 
 start_server(main_sistem, port=8080)
